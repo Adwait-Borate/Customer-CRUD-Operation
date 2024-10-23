@@ -85,27 +85,36 @@ app.post("/create", async (req, res) => {
 //give me api with update endpoint that updates the as per above schema and model?
 app.put("/update/:id", async (req, res) => {
   const { id } = req.params;
-  const { name, email, age } = req.body;
+  const { name, email, mobile } = req.body; // Changed age to mobile to match frontend
 
   try {
-    // Trim any extra spaces or newlines from the ID
     const updatedUser = await User.findByIdAndUpdate(
       id.trim(),
-      { name, email, age },
-      { new: true, runValidators: true } // Return the updated document and run validators
+      { name, email, mobile }, // Changed age to mobile
+      { new: true, runValidators: true }
     );
 
     if (!updatedUser) {
-      return res.status(404).send({ message: "User not found" });
+      return res.status(404).json({
+        success: false, // Added success flag
+        message: "User not found",
+      });
     }
 
-    // Print success message in console if user updated successfully
-    console.log(`User with ID: ${id}updated successfully!`);
+    console.log(`User with ID: ${id} updated successfully!`);
 
-    res.status(200).send(updatedUser);
+    res.status(200).json({
+      success: true, // Added success flag
+      data: updatedUser, // Added data wrapper
+      message: "User updated successfully",
+    });
   } catch (error) {
-    console.error("Error updating user:", error); 
-    res.status(400).send({ message: "Error updating user", error });
+    console.error("Error updating user:", error);
+    res.status(400).json({
+      success: false, // Added success flag
+      message: "Error updating user",
+      error: error.message,
+    });
   }
 });
 
@@ -122,7 +131,7 @@ app.get("/users/:id", async (req, res) => {
 
     res.status(200).json({ success: true, data: user });
   } catch (error) {
-    console.error("Error fetching user:", error); 
+    console.error("Error fetching user:", error);
     res.status(400).json({ message: "Error fetching user", error });
   }
 });
@@ -155,7 +164,13 @@ app.delete("/delete/:id", async (req, res) => {
   }
 });
 
-
 app.listen(PORT, () => {
   console.log(`Server started on port ${PORT}`);
 });
+
+//JSON response
+// {
+//   "name": "Sandesh",
+//   "email": "sandesh@example.com",
+//   "mobile": 9859239419
+// }
